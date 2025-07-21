@@ -1,13 +1,8 @@
-
-
-
-Jump Game Template
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>ジャンプミドリ</title>
+  <title>ジャンプみどり</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body { margin: 0; background: #202020; overflow: hidden; }
@@ -43,4 +38,44 @@ class MainScene extends Phaser.Scene {
     this.chargePower = 0;
 
     this.input.on('pointerdown', () => {
+      this.isCharging = true;
+      this.chargePower = 0;
+      this.player.setTexture('charge');
+    });
 
+    this.input.on('pointerup', () => {
+      if (this.isCharging) {
+        this.player.setVelocityY(-this.chargePower);
+        this.player.setTexture('jump');
+        this.isCharging = false;
+      }
+    });
+  }
+
+  update() {
+    if (this.isCharging) {
+      this.chargePower = Math.min(this.chargePower + 4, 300);
+    } else if (this.player.body.touching.down) {
+      this.player.setTexture('idle');
+    }
+  }
+}
+
+const config = {
+  type: Phaser.AUTO,
+  width: 400,
+  height: 400,
+  physics: {
+    default: 'arcade',
+    arcade: {
+      gravity: { y: 800 },
+      debug: false
+    }
+  },
+  scene: MainScene
+};
+
+new Phaser.Game(config);
+</script>
+</body>
+</html>
