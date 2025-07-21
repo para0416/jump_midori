@@ -25,23 +25,32 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
+    // 地面
     this.ground = this.physics.add.staticGroup();
-    this.ground.create(200, 390, 'ground').setScale(0.5).refreshBody();
+    this.ground.create(200, 360, 'ground').setScale(0.5).refreshBody();
 
-    this.player = this.physics.add.sprite(200, 300, 'idle');
-    this.player.setScale(0.3);  // ★キャラを30%に縮小
+    // プレイヤー
+    this.player = this.physics.add.sprite(200, 280, 'idle');
+    this.player.setScale(0.2); // キャラを縮小
     this.player.setCollideWorldBounds(true);
+
+    // あたり判定サイズ調整（画像に合うように小さく）
+    this.player.body.setSize(32, 48);
+    this.player.body.setOffset(0, 0);
+
     this.physics.add.collider(this.player, this.ground);
 
     this.isCharging = false;
     this.chargePower = 0;
 
+    // タップしてジャンプをためる
     this.input.on('pointerdown', () => {
       this.isCharging = true;
       this.chargePower = 0;
       this.player.setTexture('charge');
     });
 
+    // 離すとジャンプ
     this.input.on('pointerup', () => {
       if (this.isCharging) {
         this.player.setVelocityY(-this.chargePower);
@@ -60,6 +69,7 @@ class MainScene extends Phaser.Scene {
   }
 }
 
+// ゲーム設定
 const config = {
   type: Phaser.AUTO,
   width: 400,
@@ -74,6 +84,7 @@ const config = {
   scene: MainScene
 };
 
+// ゲーム開始
 new Phaser.Game(config);
 </script>
 </body>
