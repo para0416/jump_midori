@@ -1,0 +1,46 @@
+
+
+
+Jump Game Template
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>ジャンプミドリ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; background: #202020; overflow: hidden; }
+    canvas { display: block; margin: 0 auto; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+</head>
+<body>
+<script>
+class MainScene extends Phaser.Scene {
+  constructor() {
+    super('MainScene');
+  }
+
+  preload() {
+    this.load.image('idle', 'midori_idle.png');
+    this.load.image('charge', 'midori_charge.png');
+    this.load.image('jump', 'midori_jump.png');
+    this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
+  }
+
+  create() {
+    this.ground = this.physics.add.staticGroup();
+    this.ground.create(200, 390, 'ground').setScale(0.5).refreshBody();
+
+    this.player = this.physics.add.sprite(200, 300, 'idle');
+    this.player.setCollideWorldBounds(true);
+    this.player.body.setSize(32, 48);
+
+    this.physics.add.collider(this.player, this.ground);
+
+    this.isCharging = false;
+    this.chargePower = 0;
+
+    this.input.on('pointerdown', () => {
+
