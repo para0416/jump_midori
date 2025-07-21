@@ -25,24 +25,33 @@ class MainScene extends Phaser.Scene {
   }
 
   create() {
+    // 地面（ちょっと下に配置）
     this.ground = this.physics.add.staticGroup();
-    this.ground.create(200, 390, 'ground').setScale(0.5).refreshBody();
+    this.ground.create(200, 380, 'ground').setScale(0.5).refreshBody();
 
+    // プレイヤー（キャラ）を追加
     this.player = this.physics.add.sprite(200, 300, 'idle');
-    this.player.setCollideWorldBounds(true);
-    this.player.body.setSize(32, 48);
+    this.player.setScale(0.2); // キャラの見た目を縮小
 
+    // あたり判定のサイズと位置を調整
+    this.player.body.setSize(50, 70);     // 画像に合わせて当たり判定を小さく
+    this.player.body.setOffset(25, 10);   // 少し上にずらすとピッタリ
+
+    this.player.setCollideWorldBounds(true);
     this.physics.add.collider(this.player, this.ground);
 
+    // チャージ用の変数
     this.isCharging = false;
     this.chargePower = 0;
 
+    // タップ（またはクリック）でジャンプチャージ開始
     this.input.on('pointerdown', () => {
       this.isCharging = true;
       this.chargePower = 0;
       this.player.setTexture('charge');
     });
 
+    // 離したらジャンプ
     this.input.on('pointerup', () => {
       if (this.isCharging) {
         this.player.setVelocityY(-this.chargePower);
