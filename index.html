@@ -29,9 +29,8 @@ class MainScene extends Phaser.Scene {
     this.ground.create(200, 390, 'ground').setScale(0.5).refreshBody();
 
     this.player = this.physics.add.sprite(200, 300, 'idle');
+    this.player.setScale(0.3);  // ★キャラを30%に縮小
     this.player.setCollideWorldBounds(true);
-    this.player.body.setSize(32, 48);
-
     this.physics.add.collider(this.player, this.ground);
 
     this.isCharging = false;
