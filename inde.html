@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ジャンプゲーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { margin: 0; background: #000; overflow: hidden; }
+    canvas { display: block; margin: auto; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.js"></script>
+</head>
+<body>
+<script>
+class MainScene extends Phaser.Scene {
+  constructor() {
+    super('MainScene');
+  }
+
+  preload() {
+    // “assets/” フォルダ内の画像を相対パスで指定
+    this.load.image('idle',   'assets/midori_idle.png');
+    this.load.image('charge', 'assets/midori_charge.png');
+    this.load.image('jump',   'assets/midori_jump.png');
+    // 床は CDN 経由
+    this.load.image('ground', 'https://labs.phaser.io/assets/sprites/platform.png');
+  }
+
+  create() {
+    // 床を静的グループで生成
+    const ground = this.physics.add.staticGroup();
+    ground.create(400, 580, 'ground').setScale(2).refreshBody();
+
+    // プレイヤー生成
+    this.player = this.physics.add.sprite(400, 500, 'idle');
+    this.player.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player, ground);
+
+    // 入力
+    this.cursors = this.input.keyboard.createCursorKeys();
+    // タッチ用フラグ
+    this.isCharging = false;
+    this.jumpPower  = 0;
+
+    // タッチ⇔溜め⇔ジャンプ（スマホ対応）
+    this.input.on('pointerdown', () => {
+      if (this.player.body.onFloor()) {
+        this.isCharging = true;
+        this.player.setTexture('charge');
+      }
+    });
+    this.input.on('pointerup', () => {
+      if (this.isCharging && this.player.body.onFloor()) {
+        this.player.setVelocityY(-this.jumpPower);
+        this.jumpPower  = 0;
+        this.isCharging = false;
+        this.player.setTexture('jump');
+      }
+    });
+  }
+
+  update() {
+    const onGround = this.player.body.onFloor();
+
+    // ──── ジャンプ力を蓄える（キーボード） ────
+    if (this.cursors.space.isDown && onGround) {
+      this.jumpPower = Math.min(this.jumpPower + 5, 300);
+      this.player.setTexture('charge');
+      this.isCharging = true;
+    } else if (this.cursors.space.isUp && this.isCharging && onGround) {
+      this.player.setVelocityY(-this.jumpPower);
+      this.jumpPower  = 0;
+      this.isCharging = false;
+      this.player.setTexture('jump');
+    }
+
+    // ──── 左右移動（任意） ────
+    if (this.cursors.left.isDown) {
+      this.player.setVelocityX(-160);
+    } else if (this.cursors.right.isDown) {
+      this.player.setVelocityX(160);
+    } else {
+      this.player.setVelocityX(0);
+    }
+
+    // ──── 着地したら“idle”に戻す ────
+    if (onGround && !this.isCharging && this.player.texture.key !== 'idle') {
+      this.player.setTexture('idle');
+    }
+  }
+}
+
+const config = {
+  type: Phaser.AUTO,
+  width: 800,
+  height: 600,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH
+  },
+  backgroundColor: '#000000',
+  physics: {
+    default: 'arcade',
+    arcade: { gravity: { y: 800 }, debug: false }
+  },
+  scene: MainScene
+};
+
+new Phaser.Game(config);
+</script>
+</body>
+</html>
