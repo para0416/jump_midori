@@ -25,9 +25,9 @@ const MAX_JUMP_POWER = 600;
 const game = new Phaser.Game(config);
 
 function preload() {
-    this.load.image('idle', 'midori_idle.png');
-    this.load.image('charge', 'midori_charge.png');
-    this.load.image('jump', 'midori_jump.png');
+    this.load.image('idle', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
+    this.load.image('charge', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
+    this.load.image('jump', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     this.load.image('platform', 'https://labs.phaser.io/assets/sprites/platform.png');
 }
 
