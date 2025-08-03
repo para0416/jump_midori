@@ -24,10 +24,12 @@ const MAX_JUMP_POWER = 600;
 let platforms;
 let lastPlatformY = 700;
 let direction = 0;
+let background;
 
 const game = new Phaser.Game(config);
 
 function preload() {
+    this.load.image('background', 'background.png');
     this.load.image('idle', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     this.load.image('charge', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
     this.load.image('jump', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
@@ -35,6 +37,8 @@ function preload() {
 }
 
 function create() {
+    background = this.add.tileSprite(0, 0, config.width, config.height, 'background').setOrigin(0).setScrollFactor(0);
+
     platforms = this.physics.add.staticGroup();
     platforms.create(240, lastPlatformY, 'platform');
 
@@ -44,12 +48,14 @@ function create() {
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    // カメラ追従
     this.cameras.main.startFollow(player);
     this.cameras.main.setLerp(0.1, 0.1);
 }
 
 function update() {
+    // 背景をスクロールさせる演出（オプション）
+    background.tilePositionY = this.cameras.main.scrollY * 0.5;
+
     if (cursors.left.isDown) {
         direction = -1;
     } else if (cursors.right.isDown) {
@@ -72,14 +78,12 @@ function update() {
         player.setTexture('idle');
     }
 
-    // 次の足場を一定高度ごとに生成
     if (player.y < lastPlatformY - 150) {
         lastPlatformY -= 150;
         const x = Phaser.Math.Between(80, 400);
         platforms.create(x, lastPlatformY, 'platform');
     }
 
-    // ゲームオーバー処理（画面外に落ちたらリスタート）
     if (player.y > this.cameras.main.scrollY + config.height + 100) {
         this.scene.restart();
         lastPlatformY = 700;
