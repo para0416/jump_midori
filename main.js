@@ -1,75 +1,60 @@
 const config = {
-  type: Phaser.AUTO,
-  width: 768,
-  height: 512,
-  physics: {
-    default: 'arcade',
-    arcade: {
-      gravity: { y: 1000 },
-      debug: false
+    type: Phaser.AUTO,
+    width: 480,
+    height: 720,
+    physics: {
+        default: 'arcade',
+        arcade: {
+            gravity: { y: 1000 },
+            debug: false
+        }
+    },
+    scene: {
+        preload,
+        create,
+        update
     }
-  },
-  scene: {
-    preload,
-    create,
-    update
-  }
 };
 
 let player;
 let cursors;
+let isCharging = false;
+let jumpPower = 0;
+const MAX_JUMP_POWER = 600;
 
 const game = new Phaser.Game(config);
 
 function preload() {
-  this.load.image('background', 'assets/background.png');
-  this.load.image('idle', 'assets/midori_idle.png');
-  this.load.image('jump', 'assets/midori_jump.png');
-  this.load.image('charge', 'assets/midori_charge.png');
+    this.load.image('idle', 'midori_idle.png');
+    this.load.image('charge', 'midori_charge.png');
+    this.load.image('jump', 'midori_jump.png');
+    this.load.image('platform', 'https://labs.phaser.io/assets/sprites/platform.png');
 }
 
 function create() {
-  // 背景
-  this.add.image(384, 256, 'background').setScrollFactor(0);
+    const platforms = this.physics.add.staticGroup();
+    platforms.create(240, 700, 'platform');
 
-  // キャラ
-  player = this.physics.add.sprite(100, 400, 'idle').setScale(1).setCollideWorldBounds(true);
+    player = this.physics.add.sprite(240, 600, 'idle');
+    player.setCollideWorldBounds(true);
+    this.physics.add.collider(player, platforms);
 
-  // 地面の代用（透明な見えない床）
-  const ground = this.physics.add.staticGroup();
-  ground.create(384, 500, 'idle').setScale(10, 0.5).refreshBody().setVisible(false);
-  this.physics.add.collider(player, ground);
-
-  // 入力
-  cursors = this.input.keyboard.createCursorKeys();
+    cursors = this.input.keyboard.createCursorKeys();
 }
 
 function update() {
-  const speed = 200;
+    if (cursors.space.isDown) {
+        isCharging = true;
+        jumpPower = Math.min(jumpPower + 20, MAX_JUMP_POWER);
+        player.setTexture('charge');
+    } else if (isCharging) {
+        player.setVelocityY(-jumpPower);
+        isCharging = false;
+        jumpPower = 0;
+        player.setTexture('jump');
+    }
 
-  if (cursors.left.isDown) {
-    player.setVelocityX(-speed);
-    player.setFlipX(true);
-  } else if (cursors.right.isDown) {
-    player.setVelocityX(speed);
-    player.setFlipX(false);
-  } else {
-    player.setVelocityX(0);
-  }
-
-  // ジャンプ
-  if (cursors.up.isDown && player.body.touching.down) {
-    player.setVelocityY(-500);
-    player.setTexture('jump');
-  }
-
-  // チャージ（しゃがみ）
-  if (cursors.down.isDown && player.body.touching.down) {
-    player.setTexture('charge');
-  }
-
-  // 通常に戻す
-  if (player.body.touching.down && !cursors.down.isDown && player.texture.key !== 'idle') {
-    player.setTexture('idle');
-  }
+    if (player.body.touching.down && !isCharging) {
+        player.setTexture('idle');
+    }
 }
